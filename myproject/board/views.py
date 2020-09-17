@@ -14,6 +14,7 @@ def board_topics(request, pk):
     #try:
         #board = Board.objects.get(pk=pk)
     board = get_object_or_404(Board, pk=pk)
+
     #except Board.DoesNotExist:
     #    raise Http404
 
