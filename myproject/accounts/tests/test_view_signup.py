@@ -10,7 +10,7 @@ class SignUpTests(TestCase):
         url = reverse('signup')
         self.response = self.client.get(url)
 
-    def test_signup_template(self):
+    def test_signup_template_response(self):
         self.assertEquals(self.response.status_code,200)
 
     def test_signup_url_resolves_signup_view(self):
@@ -28,7 +28,7 @@ class SignUpTests(TestCase):
         '''
         The view must contain Five inputs, username, email, passwword1, password2
         '''
-        self.assertContain(self.response, '<input>', 5)
+        self.assertContains(self.response, '<input', 5)
         self.assertContains(self.response, 'type="text"', 1)
         self.assertContains(self.response, 'type="email"', 1)
         self.assertContains(self.response, 'type="password"', 2)
