@@ -38,4 +38,6 @@ urlpatterns = [
     path('signup/', accounts_views.signup, name='signup'),
     path('admin/', admin.site.urls),
     path('logout/', auth_views.LogoutView.as_view(), name ='logout'),
+    path('boards/<int:pk>/topics/<int:topic_pk>', views.topic_posts, name ='topic_posts'),
+    path('boards/<int:pk>/topics/<int:topic_pk>/reply/', views.reply_topic, name='reply_topic'),
 ]
