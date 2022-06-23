@@ -20,7 +20,7 @@ jobs:
   
   print_hello:
     docker:
-      - image: cimg/node:13.8.0
+      - image: cimg/base:stable
     steps:
       - run:
           name: "Print hello"
@@ -28,7 +28,7 @@ jobs:
 
   print_world:
     docker:
-      - image: cimg/node:13.8.0
+      - image: cimg/base:stable
     steps:
       - checkout
       - run:
@@ -37,9 +37,9 @@ jobs:
   
   print_my_name:
     docker:
-      - image: cimg/node:13.8.0
+      - image: cimg/base:stable
     steps:
-      - checkcout
+      - checkout
       - run:
           name: "Print Name"
           command: "echo $MY_NAME"
