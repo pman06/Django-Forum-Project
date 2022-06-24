@@ -50,12 +50,12 @@ jobs:
     steps:
       - checkout
       - run: echo $PWD
-      - run: mkdir -p workspace
+      - run: mkdir -p /tmp/workspace && ls /tmp/ | grep "workspace"
       - run:
           name: "save file"
           command: echo "Text to ouput here" >> output.txt 
       - persist_to_workspace:
-          root: workspace
+          root: /tmp/workspace
           paths:
             - output.txt
 
