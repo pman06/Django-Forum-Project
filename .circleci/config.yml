@@ -49,9 +49,10 @@ jobs:
       - image: cimg/base:stable
     steps:
       - checkout
+      - run: mkdir -p workspace
       - run:
           name: "save file"
-          command: echo "Text to ouput here" >> output.txt && ls -a
+          command: echo "Text to ouput here" >> workspace/output.txt && ls ./workspace -a
       - persist_to_workspace:
           root: workspace
           paths:
