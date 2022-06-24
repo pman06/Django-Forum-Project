@@ -49,11 +49,13 @@ jobs:
       - image: cimg/base:stable
     steps:
       - checkout
+      - run: echo $PWD
+      - run: mkdir -p workspace
       - run:
           name: "save file"
           command: echo "Text to ouput here" >> output.txt 
       - persist_to_workspace:
-          root: /tmp/workspace
+          root: workspace
           paths:
             - output.txt
 
