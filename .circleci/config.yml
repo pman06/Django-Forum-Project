@@ -49,8 +49,6 @@ jobs:
       - image: cimg/base:stable
     steps:
       - checkout
-      - run: echo $PWD
-      - run: mkdir -p workspace && ls /tmp/ | grep "workspace"
       - run:
           name: "save file"
           command: echo "Text to ouput here" >> output.txt && ls -a
