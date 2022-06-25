@@ -24,12 +24,12 @@ jobs:
     steps:
       - run: |
           echo $(MY_FAIL_VARIABLE)
-          return 1
+          exit 1
       - run:
           name: check_fail
           command: echo "This is sfailed but we move"  
           when: on_fail
-          
+
   print_pipeline:
     <<: *image
     steps:
