@@ -2,14 +2,32 @@
 # See: https://circleci.com/docs/2.0/configuration-reference
 version: 2.1
 
+commands:
+  print_pipeline_id:
+    description: My first test command
+    parameters:
+      to: 
+        type: string
+        default: Hello
+    steps:
+      - run: echo $CIRCLE_WORKFLOW_ID
+
+default: &image
+  docker:
+      - image: cimg/base:stable
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
+  print_pipeline:
+    <<: *image
+    steps:
+      - print_pipeline_id:
+          to:  My Piepeline
+
   say-hello:
     # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
     # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
-    docker:
-      - image: cimg/base:stable
+    <<: *image
     # Add steps to the job  
     # See: https://circleci.com/docs/2.0/configuration-reference/#steps
     steps:
@@ -19,16 +37,14 @@ jobs:
           command: "echo Hello, World!"
   
   print_hello:
-    docker:
-      - image: cimg/base:stable
+    <<: *image
     steps:
       - run:
           name: "Print hello"
           command:  "echo hello"
 
   print_world:
-    docker:
-      - image: cimg/base:stable
+    <<: *image
     steps:
       - checkout
       - run:
@@ -36,8 +52,7 @@ jobs:
           command: "echo World"
   
   print_my_name:
-    docker:
-      - image: cimg/base:stable
+    <<: *image
     steps:
       - checkout
       - run:
@@ -45,22 +60,20 @@ jobs:
           command: "echo $MY_NAME"
 
   save_hello_world_output:
-    docker:
-      - image: cimg/base:stable
+    <<: *image
     steps:
       - checkout
       - run: mkdir -p workspace
       - run:
           name: "save file"
-          command: echo "Text to ouput here" >> workspace/output.txt && ls ./workspace -a
+          command: echo "Text to ouput here" >> workspace/output.txt
       - persist_to_workspace:
           root: workspace
           paths:
             - output.txt
 
   print_output_file:
-    docker:
-      - image: cimg/base:stable
+    <<: *image
     steps:
       - attach_workspace:
           at: /tmp/workspace
@@ -81,4 +94,7 @@ workflows:
       - print_output_file:
           requires:
             - save_hello_world_output
+  print-env-workflow:
+    jobs:
+      - print_pipeline
 
