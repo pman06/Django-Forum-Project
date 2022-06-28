@@ -133,8 +133,7 @@ workflows:
             - save_hello_world_output
   print-aws-ip:
     jobs:
-      - aws_cred_setup:
-          context: aws
+      - aws_cred_setup
       - print_ip_inventory:
           requires: 
             - aws_cred_setup
