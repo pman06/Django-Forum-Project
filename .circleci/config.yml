@@ -28,27 +28,27 @@ jobs:
           aws-access-key-id:  AWS_ACCESS_KEY
           aws-secret-access-key: AWS_SECRET_KEY
           aws-region: AWS_REGION_NAME
-      - run: |
-          aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --filter "Name=tag:Projects,Values=udacity" --output text >> ~/inventory
+      - run: aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --filter "Name=tag:Projects,Values=udacity" --output text >> ./inventory
       - persist_to_workspace:
-        root: ~/
-        paths: inventory
+        root: ./
+        paths: 
+          - inventory
   
   print_ip_inventory:
     <<: *image
     steps:
       - attach_workspace:
-        at: ~/
+        at: ./
       - run:
           name: "print out IP"
-          command: echo ~/inventory
+          command: echo ./inventory
 
   test_when:
     docker: 
       - image: circleci/node:13.8.0
     steps:
       - run: |
-          echo $(MY_NAMEE)
+          echo $(MY_NAME)
           exit 1
       - run:
           name: check_fail
@@ -131,12 +131,11 @@ workflows:
       - print_output_file:
           requires:
             - save_hello_world_output
-  print-env-workflow:
+  print-aws-ip:
     jobs:
-      - print_pipeline
-      - test_when
       - aws_cred_setup:
           context: aws
       - print_ip_inventory:
-          requires: aws_cred_setup
+          requires: 
+            - aws_cred_setup
 
