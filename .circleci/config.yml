@@ -22,7 +22,7 @@ orbs:
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
   aws_cred_setup:
-    executor: aws-cli/default:
+    executor: aws-cli/default
     steps:
       - aws-cli/setup:
           aws-access-key-id:  AWS_ACCESS_KEY
