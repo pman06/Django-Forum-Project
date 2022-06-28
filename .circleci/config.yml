@@ -41,7 +41,7 @@ jobs:
           at: ./
       - run:
           name: "print out IP"
-          command: echo ./inventory
+          command: cat ./inventory
 
   test_when:
     docker: 
