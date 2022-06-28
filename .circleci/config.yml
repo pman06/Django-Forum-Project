@@ -15,15 +15,40 @@ commands:
 default: &image
   docker:
       - image: cimg/base:stable
+
+orbs:
+  aws-cli: circleci/aws-cli@2.0.6
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
+  aws_cred_setup:
+    executor: aws-cli/setup:
+      aws-access-key-id:  AWS_ACCESS_KEY
+      aws-secret-access-key: AWS_SECRET_KEY
+      aws-region: AWS_REGION_NAME
+  steps:
+    - checkout
+    - run: |
+        aws ec2 describe-instances --query 'Respository[*].Instances[*].PublicIpAddress' --filter "Name=tag:Projects,Values=udacity" --output text >> ~/inventory
+      - persist_to_workspace:
+        root: ~/
+        paths: inventory
+  
+  print_ip_inventory:
+    <<: *image
+    steps:
+      - attach_workspace:
+        at: ~/
+      - run:
+          name: "print out IP"
+          command: echo ~/inventory
+
   test_when:
     docker: 
       - image: circleci/node:13.8.0
     steps:
       - run: |
-          echo $(MY_FAIL_VARIABLE)
+          echo $(MY_NAMEE)
           exit 1
       - run:
           name: check_fail
@@ -110,4 +135,8 @@ workflows:
     jobs:
       - print_pipeline
       - test_when
+      - aws_cred_setup
+          context: aws
+      - print_ip_inventory 
+          requires: aws_cred_setup
 
