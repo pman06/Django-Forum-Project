@@ -135,8 +135,8 @@ workflows:
     jobs:
       - print_pipeline
       - test_when
-      - aws_cred_setup
+      - aws_cred_setup:
           context: aws
-      - print_ip_inventory 
+      - print_ip_inventory:
           requires: aws_cred_setup
 
