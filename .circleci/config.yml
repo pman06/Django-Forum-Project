@@ -22,14 +22,14 @@ orbs:
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
   aws_cred_setup:
-    executor: aws-cli/setup:
-      aws-access-key-id:  AWS_ACCESS_KEY
-      aws-secret-access-key: AWS_SECRET_KEY
-      aws-region: AWS_REGION_NAME
-  steps:
-    - checkout
-    - run: |
-        aws ec2 describe-instances --query 'Respository[*].Instances[*].PublicIpAddress' --filter "Name=tag:Projects,Values=udacity" --output text >> ~/inventory
+    executor: aws-cli/default:
+    steps:
+      - aws-cli/setup:
+          aws-access-key-id:  AWS_ACCESS_KEY
+          aws-secret-access-key: AWS_SECRET_KEY
+          aws-region: AWS_REGION_NAME
+      - run: |
+          aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --filter "Name=tag:Projects,Values=udacity" --output text >> ~/inventory
       - persist_to_workspace:
         root: ~/
         paths: inventory
