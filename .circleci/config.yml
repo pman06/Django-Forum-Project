@@ -133,14 +133,15 @@ jobs:
     steps:
       - checkout
       - setup_aws
-      - run: yum install -v tar gzip
+      - run: yum install -y tar gzip
       - attach_workspace:
           at: ~/
       - run:
           name: Destroy previous S3 bucket and Cloudformation stack.
           command: |
             export OldBucketID=$(cat ~/textfile.txt)
-            aws s3 rm "s3//${OldBucketID}" --recursive
+            aws s3 rb  "s3//${OldBucketID}" --force
+            aws cloudformation delete-stack --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:7}            
       - destroy-environment
 
 
