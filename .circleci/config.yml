@@ -1,5 +1,9 @@
 version: 2.1
 
+default: &aws-image
+  docker:
+      - image:  amazon/aws-cli
+
 commands:
   destroy-environment:
     steps:
@@ -79,14 +83,80 @@ jobs:
               return 1
             fi
       - destroy-environment 
+  
+  create_and_deploy_front_end:
+    <<: *aws-image
+    steps:
+      - checkout
+      - run:
+          name: Execute bucket.yml 
+          command: |
+            aws cloudformation deploy --template-file bucket.yml \
+            --stack-name stack-create-bucket-${CIRCLE_WORKFLOW_ID:0:7} \
+            --parameter=overrides MyBucketNaeme="mybucket-${CIRCLE_WORKFLOW_ID:0:7"
+            ls -a
+      - run: aws  s3 sync ./index.html s3://mybucket-${CIRCLE_WORKFLOW_ID:0:7} --delete
+
+  get_last_deployment_id:
+    <<: *aws-image
+    steps:
+      - checkout
+      - run: yum install -y tar gzip
+      - run:
+          name: Fetch and save the old pipeline ID (bucket name) responsible for the last release
+          command: |
+            aws cloudformation list-exports --query "Exports[?Name=='PipelineID'].Value" \
+            --no-paginate --output text > ~/textfile.txt
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - textfile.txt
+  
+  promote_to_production:
+    <<: *aws-image
+    steps:
+      - checkout
+      - run:
+          name: Execute cloudfront.yml
+          command: |
+            aws cloudformation deploy \
+            --template-file cloudfront.yml \
+            --stack-name production-distro \
+            --parameter-overrrides PipelineID="mybucket-${CIRCLE_WORKFLOW_ID:0:7}" 
+
+  clean_up_old_front_end:
+    <<: *aws-image
+    steps:
+      - checkout
+      - run: yum install -v tar -gzip
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Destroy previous S3 bucket and Cloudformation stack.
+          command: |
+            export OldBucketID=$(cat ~/textfile.txt)
+            aws s3 rm "s3//${OldBucketID}" --recursive
+
+
 
 workflows:
   createin-frastructure:
     jobs:
-      - create-infrastructure      
-      - config_infrastructure:
-          requires:
-            - create-infrastructure
+      #- create-infrastructure      
+      #- config_infrastructure:
+       #   requires:
+        #    - create-infrastructure
       #- smoke_test:
        #   requires:
         #    - config_infrastructure
+  create-resoiurces:
+    jobs:
+      - create_and_deploy_front_end
+      - promote_to_production:
+          requires:
+            - create_and_deploy_front_end
+      - get_last_deployment_id
+      - clean_up_old_front_end:
+          requires:
+            - get_last_deployment_id
+            - promote_to_production
