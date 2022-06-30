@@ -11,6 +11,10 @@ Resources:
       InstanceType: t2.micro
       SecurityGroupIds:
         - !Ref InstanceSecurityGroup
+      Tags:
+        - Key: Projects
+          Value: udacity
+  
   
   InstanceSecurityGroup:
     Type: AWS::EC2::SecurityGroup
