@@ -118,6 +118,7 @@ jobs:
     <<: *aws-image
     steps:
       - checkout
+      - setup_aws
       - run:
           name: Execute cloudfront.yml
           command: |
@@ -131,6 +132,7 @@ jobs:
     <<: *aws-image
     steps:
       - checkout
+      - setup_aws
       - run: yum install -v tar -gzip
       - attach_workspace:
           at: ~/
