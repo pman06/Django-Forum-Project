@@ -135,15 +135,17 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          name: Destroy previous S3 bucket and Cloudformation stack.
+          name: Destroy previous S3 bucket 
           command: |
             export OldBucketID=$(cat ~/textfile.txt)
             aws s3 rm "s3://${OldBucketID}" --recursive
             sed -i "s/mybucket/myStack/" ~/textfile.txt
             aws s3 rb "s3://${OldBucketID}" --force 
+      - run:
+          name: Delete previous Cloudformation stack.
+          command: |
             cat ${OldBucketID}
-            aws cloudformation delete-stack --stack-name "${OldBucketID}"
-      
+            aws cloudformation delete-stack --stack-name ${OldBucketID}
 
 
 
