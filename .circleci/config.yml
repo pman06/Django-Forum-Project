@@ -47,7 +47,8 @@ jobs:
             URL="https://www.udacity.com/blog"
             if curl -s --head ${URL}
             then
-              return 0
+              echo "It Runs alright"
+              return 1
             else
               return 1
             fi
