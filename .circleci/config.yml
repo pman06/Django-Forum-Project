@@ -126,7 +126,6 @@ jobs:
             --stack-name production-distro \
             --parameter-overrides PipelineID="mybucket-${CIRCLE_WORKFLOW_ID:0:7}" 
       
-
   clean_up_old_front_end:
     <<: *aws-image
     steps:
@@ -140,6 +139,8 @@ jobs:
           command: |
             export OldBucketID=$(cat ~/textfile.txt)
             aws s3 rm "s3://${OldBucketID}" --recursive
+            sed -i "s/mybucket/myStack/" ${OldBucketID}
+            aws cloudformation delete-stack --stack-name ${OldBucketID}
       
 
 
