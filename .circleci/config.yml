@@ -140,7 +140,9 @@ jobs:
             export OldBucketID=$(cat ~/textfile.txt)
             aws s3 rm "s3://${OldBucketID}" --recursive
             sed -i "s/mybucket/myStack/" ~/textfile.txt
-            aws cloudformation delete-stack --stack-name ${OldBucketID}
+            aws s3 rb "s3://${OldBucketID}" --force 
+            cat ${OldBucketID}
+            aws cloudformation delete-stack --stack-name "${OldBucketID}"
       
 
 
