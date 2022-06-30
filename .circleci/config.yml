@@ -10,10 +10,10 @@ commands:
   
   setup_aws:
     steps:
-      aws-cli/setup:
-        aws-access-key-id: AWS_ACCESS_KEY
-        aws-secret-access-key: AWS_SECRET_KEY
-        aws-region: AWS_REGION_NAME
+      - aws-cli/setup:
+          aws-access-key-id: AWS_ACCESS_KEY
+          aws-secret-access-key: AWS_SECRET_KEY
+          aws-region: AWS_REGION_NAME
 
 orbs:
   aws-cli: circleci/aws-cli@3.1.1
