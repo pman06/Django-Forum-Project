@@ -7,6 +7,13 @@ commands:
           name: destroy environments
           command: aws cloudformation delete-stack --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:5}
           when: on_fail
+  
+  setup_aws:
+    steps:
+      aws-cli/setup:
+        aws-access-key-id: AWS_ACCESS_KEY
+        aws-secret-access-key: AWS_SECRET_KEY
+        aws-region: AWS_REGION_NAME
 
 orbs:
   aws-cli: circleci/aws-cli@3.1.1
@@ -16,10 +23,7 @@ jobs:
     executor: aws-cli/default
     steps:
       - checkout
-      - aws-cli/setup:
-          aws-access-key-id: AWS_ACCESS_KEY
-          aws-secret-access-key: AWS_SECRET_KEY
-          aws-region: AWS_REGION_NAME
+      - setup_aws
       - run:
           name: Create cloudformation stack
           command: |
@@ -58,10 +62,10 @@ jobs:
             ansible-playbook main-remote.yml -i ./inventory
   
   smoke_test:
-    docker:
-      - image: alpine:latest
+    executor: aws-cli/default
     steps:
       - checkout
+      - setup_aws
       - run:
           name: Smoke Run
           command: |
