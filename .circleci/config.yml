@@ -125,7 +125,7 @@ jobs:
             --template-file cloudfront.yml \
             --stack-name production-distro \
             --parameter-overrides PipelineID="mybucket-${CIRCLE_WORKFLOW_ID:0:7}" 
-      - destoy-environment
+      - destroy-environment
 
   clean_up_old_front_end:
     <<: *aws-image
@@ -139,7 +139,7 @@ jobs:
           command: |
             export OldBucketID=$(cat ~/textfile.txt)
             aws s3 rm "s3//${OldBucketID}" --recursive
-      - destoy-environment
+      - destroy-environment
 
 
 
@@ -153,7 +153,7 @@ workflows:
       #- smoke_test:
        #   requires:
         #    - config_infrastructure
-  create-resoiurces:
+  create-resources:
     jobs:
       - create_and_deploy_front_end
       - promote_to_production:
