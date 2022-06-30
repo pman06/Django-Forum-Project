@@ -1,0 +1,11 @@
+certifi==2022.6.15
+cffi==1.15.0
+cryptography==36.0.2
+distlib==0.3.4
+filelock==3.7.1
+pipenv==2022.6.7
+platformdirs==2.5.2
+pycparser==2.21
+six==1.16.0
+virtualenv==20.15.1
+virtualenv-clone==0.5.7
