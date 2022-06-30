@@ -96,7 +96,6 @@ jobs:
             --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:7} \
             --parameter-overrides MyBucketName="mybucket-${CIRCLE_WORKFLOW_ID:0:7}"
       - run: aws  s3 cp index.html s3://mybucket-${CIRCLE_WORKFLOW_ID:0:7}
-      - destroy-environment
 
   get_last_deployment_id:
     <<: *aws-image
@@ -126,7 +125,7 @@ jobs:
             --template-file cloudfront.yml \
             --stack-name production-distro \
             --parameter-overrides PipelineID="mybucket-${CIRCLE_WORKFLOW_ID:0:7}" 
-      - destroy-environment
+      
 
   clean_up_old_front_end:
     <<: *aws-image
@@ -140,9 +139,8 @@ jobs:
           name: Destroy previous S3 bucket and Cloudformation stack.
           command: |
             export OldBucketID=$(cat ~/textfile.txt)
-            cat ${OldBucketID}
             aws s3 rb  "s3//${OldBucketID}" --force
-      - destroy-environment
+      
 
 
 
