@@ -27,7 +27,7 @@ jobs:
             --region us-east-1
       - run:
           name: Get running instance IP
-          commandd: |
+          command: |
             echo "[all]" > inventory
             aws ec2 describe-instances \
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
