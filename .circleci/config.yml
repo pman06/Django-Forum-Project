@@ -43,7 +43,7 @@ jobs:
       - run:
           name: Smoke Run
           command: |
-            apt install -y curl
+            sudo apt-get install -y curl
             URL="https://www.udacity.com/blog"
             if curl -s --head ${URL}
             then
