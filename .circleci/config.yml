@@ -133,7 +133,7 @@ jobs:
     steps:
       - checkout
       - setup_aws
-      - run: yum install -v tar -gzip
+      - run: yum install -v tar gzip
       - attach_workspace:
           at: ~/
       - run:
