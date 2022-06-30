@@ -38,7 +38,7 @@ jobs:
   smoke_test:
     docker:
       - image: alpine:latest
-    step:
+    steps:
       - checkout
       - run:
           name: Smoke Run
