@@ -43,7 +43,7 @@ jobs:
       - run:
           name: Smoke Run
           command: |
-            apk install curl
+            apk add curl
             URL="https://www.udacity.com/blog"
             if curl -s --head ${URL}
             then
