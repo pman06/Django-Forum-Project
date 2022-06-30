@@ -107,7 +107,7 @@ jobs:
       - run:
           name: Fetch and save the old pipeline ID (bucket name) responsible for the last release
           command: |
-            aws cloudformation list-exports --region=us-east-1 --query "Exports[?Name=='PipelineID'].Value" \
+            aws cloudformation list-exports --query "Exports[?Name=='PipelineID'].Value" \
             --no-paginate --output text > ~/textfile.txt
       - persist_to_workspace:
           root: ~/
@@ -140,8 +140,8 @@ jobs:
           name: Destroy previous S3 bucket and Cloudformation stack.
           command: |
             export OldBucketID=$(cat ~/textfile.txt)
+            cat ${OldBucketID}
             aws s3 rb  "s3//${OldBucketID}" --force
-            aws cloudformation delete-stack --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:7}            
       - destroy-environment
 
 
