@@ -32,6 +32,7 @@ jobs:
       - run:
           name: Test Board App
           command: |
+            cd myproject
             python manage.py test board/tests
       - save_cache:
           paths:
