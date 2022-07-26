@@ -39,6 +39,7 @@ jobs:
       - run:
           name: Build Environment
           command: |
+              cd myproject
               python3 -m pip install -r requirements.txt
 
   Test_Environment:
