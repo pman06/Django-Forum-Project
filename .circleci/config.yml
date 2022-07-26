@@ -29,6 +29,8 @@ jobs:
     <<: *python-image
     steps:
       - checkout
+      - restore_cache:
+          key: v1-python-cache-{{ checksum "requirements.txt" }}
       - run:
           name: Create Environment
           command: |
@@ -41,11 +43,17 @@ jobs:
           command: |
               cd myproject
               python3 -m pip install -r requirements.txt
-
+      - save_cache:
+          paths:
+            - ~/.django_env 
+          key: v1-python-cache-{{ checksum "requirements.txt" }} 
   Test_Environment:
     <<: *python-image
     steps:
       - checkout
+      - restore_cache:
+          key: v1-python-cache-{{ checksum "requirements.txt" }}
+      - run: source ~/.django_env/bin/activate
       - run:
           name: Test Account App
           command: |
