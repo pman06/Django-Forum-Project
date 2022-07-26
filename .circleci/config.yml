@@ -1,10 +1,14 @@
 version: 2.1
 
-default: &aws-image
+default: &python-image
   docker:
-      - image:  amazon/aws-cli
+      - image: cimg/python:3.10.5
 
 commands:
+  install-tar:
+    steps:
+      - run: apt install -y tar gzip
+      
   destroy-environment:
     steps:
       - run:
@@ -19,154 +23,44 @@ commands:
           aws-secret-access-key: AWS_SECRET_KEY
           aws-region: AWS_REGION_NAME
 
-orbs:
-  aws-cli: circleci/aws-cli@3.1.1
 
 jobs:
-  create-infrastructure:
-    executor: aws-cli/default
+  Create_Environment:
+    <<: *python-image
     steps:
       - checkout
-      - setup_aws
       - run:
-          name: Create cloudformation stack
+          name: Create Environment
           command: |
-            aws cloudformation deploy --template-file template.yml --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:7} \
-            --region us-east-1
+              #create execution environment
+              python3 -m venv ~/.django_env
+              #activate environment
+              source ~/.django_env/bin/activate
       - run:
-          name: Get running instance IP
+          name: Build Environment
           command: |
-            echo "[all]" > inventory
-            aws ec2 describe-instances \
-            --query 'Reservations[*].Instances[*].PublicIpAddress' \
-            --filter "Name=tag:Projects,Values=udacity" \
-            --output text >> inventory
-      - persist_to_workspace:
-          root: ./
-          paths:
-            - inventory
+              python3 -m pip install -r requirements.txt
 
-  config_infrastructure:
-    docker:
-      - image: python:3.7-alpine3.11
+  Test_Environment:
+    <<: *python-image
     steps:
       - checkout
-      - add_ssh_keys:
-          fingerprints:
-            - "c0:3d:35:85:bb:69:71:39:8a:61:b4:b7:61:25:e0:6a"
       - run:
-          name: Install Ansible
+          name: Test Account App
           command: |
-            apk add --update ansible
-      - attach_workspace:
-          at: ./
+            pwd
+            cd myproject
+            python manage.py test accounts/tests
       - run:
-          name: Run Playbook and Configure Server
+          name: TEst Board App
           command: |
-            ansible-playbook main-remote.yml -i ./inventory
+            python manage.py test board/tests
   
-  smoke_test:
-    executor: aws-cli/default
-    steps:
-      - checkout
-      - setup_aws
-      - run:
-          name: Smoke Run
-          command: |
-            apk add curl
-            URL="https://www.udacity.com/blog"
-            if curl -s --head ${URL}
-            then
-              echo "It Runs alright"
-              return 1
-            else
-              return 1
-            fi
-      - destroy-environment 
   
-  create_and_deploy_front_end:
-    <<: *aws-image
-    steps:
-      - checkout
-      - setup_aws
-      - run:
-          name: Execute bucket.yml 
-          command: |
-            aws cloudformation deploy --template-file bucket.yml \
-            --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:7} \
-            --parameter-overrides MyBucketName="mybucket-${CIRCLE_WORKFLOW_ID:0:7}"
-      - run: aws  s3 cp index.html s3://mybucket-${CIRCLE_WORKFLOW_ID:0:7}
-
-  get_last_deployment_id:
-    <<: *aws-image
-    steps:
-      - checkout
-      - setup_aws
-      - run: yum install -y tar gzip
-      - run:
-          name: Fetch and save the old pipeline ID (bucket name) responsible for the last release
-          command: |
-            aws cloudformation list-exports --query "Exports[?Name=='PipelineID'].Value" \
-            --no-paginate --output text > ~/textfile.txt
-      - persist_to_workspace:
-          root: ~/
-          paths:
-            - textfile.txt
-  
-  promote_to_production:
-    <<: *aws-image
-    steps:
-      - checkout
-      - setup_aws
-      - run:
-          name: Execute cloudfront.yml
-          command: |
-            aws cloudformation deploy \
-            --template-file cloudfront.yml \
-            --stack-name production-distro \
-            --parameter-overrides PipelineID="mybucket-${CIRCLE_WORKFLOW_ID:0:7}" 
-      
-  clean_up_old_front_end:
-    <<: *aws-image
-    steps:
-      - checkout
-      - setup_aws
-      - run: yum install -y tar gzip
-      - attach_workspace:
-          at: ~/
-      - run:
-          name: Destroy previous S3 bucket 
-          command: |
-            export OldBucketID=$(cat ~/textfile.txt)
-            aws s3 rm "s3://${OldBucketID}" --recursive
-            aws s3 rb "s3://${OldBucketID}" --force 
-      - run:
-          name: Delete previous Cloudformation stack.
-          command: |
-            sed -i "s/mybucket/myStack/" ~/textfile.txt
-            export OldStackID=$(cat ~/textfile.txt)
-            aws cloudformation delete-stack --stack-name ${OldStackID}
-
-
-
 workflows:
-  #createin-frastructure:
-   # jobs:
-      #- create-infrastructure      
-      #- config_infrastructure:
-       #   requires:
-        #    - create-infrastructure
-      #- smoke_test:
-       #   requires:
-        #    - config_infrastructure
   create-resources:
     jobs:
-      - create_and_deploy_front_end
-      - promote_to_production:
+      - Create_Environment
+      - Test_Environment:
           requires:
-            - create_and_deploy_front_end
-      - get_last_deployment_id
-      - clean_up_old_front_end:
-          requires:
-            - get_last_deployment_id
-            - promote_to_production
+            - Create_Environment
