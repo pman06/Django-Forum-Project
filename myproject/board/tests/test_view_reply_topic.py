@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse, resolve
 from ..models import Board, Topic, Post
-from ..views import reply_topic
+from ..views import reply_topic, topic_posts
 from ..forms import PostForm
 
 class ReplyTopicTestCase(TestCase):
@@ -59,7 +59,7 @@ class SuccessfulReplyTopicTests(ReplyTopicTestCase):
         '''
         A valid form submission should redirect the user
         '''
-        url = reverse('test_posts', kwards={'pk':self.board.pk, 'topic_pk':self.topic.pk})
+        url = reverse('topic_posts', kwargs={'pk':self.board.pk, 'topic_pk':self.topic.pk})
         topic_posts_url = '{url}?page=1#2'.format(url=url)
         self.assertRedirects(self.response, topic_posts_url)
 
