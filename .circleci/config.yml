@@ -4,28 +4,8 @@ default: &python-image
   docker:
       - image: cimg/python:3.10.5
 
-commands:
-  install-tar:
-    steps:
-      - run: apt install -y tar gzip
-      
-  destroy-environment:
-    steps:
-      - run:
-          name: destroy environments
-          command: aws cloudformation delete-stack --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:7}
-          when: on_fail
-  
-  setup_aws:
-    steps:
-      - aws-cli/setup:
-          aws-access-key-id: AWS_ACCESS_KEY
-          aws-secret-access-key: AWS_SECRET_KEY
-          aws-region: AWS_REGION_NAME
-
-
 jobs:
-  Create_Environment:
+  Build_and_Test:
     <<: *python-image
     steps:
       - checkout
@@ -43,17 +23,6 @@ jobs:
           command: |
               cd myproject
               python3 -m pip install -r requirements.txt
-      - save_cache:
-          paths:
-            - ~/.django_env 
-          key: v1-python-cache-{{ checksum "requirements.txt" }} 
-  Test_Environment:
-    <<: *python-image
-    steps:
-      - checkout
-      - restore_cache:
-          key: v1-python-cache-{{ checksum "requirements.txt" }}
-      - run: source ~/.django_env/bin/activate
       - run:
           name: Test Account App
           command: |
@@ -61,15 +30,26 @@ jobs:
             cd myproject
             python manage.py test accounts/tests
       - run:
-          name: TEst Board App
+          name: Test Board App
           command: |
             python manage.py test board/tests
+      - save_cache:
+          paths:
+            - ~/.django_env 
+          key: v1-python-cache-{{ checksum "requirements.txt" }} 
+
+      
+  # Test_Environment:
+  #   <<: *python-image
+  #   steps:
+  #     - checkout
+  #     - restore_cache:
+  #         key: v1-python-cache-{{ checksum "requirements.txt" }}
+  #     - run: source ~/.django_env/bin/activate
+      
   
   
 workflows:
-  create-resources:
+  test_codes:
     jobs:
-      - Create_Environment
-      - Test_Environment:
-          requires:
-            - Create_Environment
+      - Build_and_Test
